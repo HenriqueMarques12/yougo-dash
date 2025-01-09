@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+
+@font-face {
+    font-family: "Hogfish";
+    src: url("/src/fonts/Hogfish.otf") format("otf");
+}
+@tailwind utilities;
