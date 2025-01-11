@@ -22,7 +22,10 @@ const config: Config = {
         accent: "#F3C82E",
         secondary: "#5E0065",
         fontDark: "#000",
-        fontLight: "#fff"
+        fontLight: "#fff",
+        success: "#4BB543",
+        warning: "#eed202",
+        error: "#FF9494"
       }
     },
   },
