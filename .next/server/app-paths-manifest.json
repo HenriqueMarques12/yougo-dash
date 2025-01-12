@@ -2,10 +2,10 @@
   "/_not-found": "app/_not-found.js",
   "/editarCadastro/[slug]/[id]/page": "app/editarCadastro/[slug]/[id]/page.js",
   "/editarCadastro/[slug]/page": "app/editarCadastro/[slug]/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js",
   "/editarCadastro/page": "app/editarCadastro/page.js",
-  "/favIcon/fd48b44166b87192a1cf439ae3a3aeb9.ico/apple-icon.png/route": "app/favIcon/fd48b44166b87192a1cf439ae3a3aeb9.ico/apple-icon.png/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
   "/painel/page": "app/painel/page.js",
-  "/login/page": "app/login/page.js"
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/favIcon/fd48b44166b87192a1cf439ae3a3aeb9.ico/apple-icon.png/route": "app/favIcon/fd48b44166b87192a1cf439ae3a3aeb9.ico/apple-icon.png/route.js"
 }

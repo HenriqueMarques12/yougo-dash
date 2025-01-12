@@ -32,14 +32,6 @@
       "static/chunks/326-ca1eaea43d1f2c4f.js",
       "static/chunks/app/editarCadastro/[slug]/page-dfc7b62632463fc5.js"
     ],
-    "/page": [
-      "static/chunks/webpack-9d9d79d744a4a034.js",
-      "static/chunks/fd9d1056-13342476f4426106.js",
-      "static/chunks/472-4c7f1c38a7e95f4e.js",
-      "static/chunks/main-app-6b9cca0b1b6176f3.js",
-      "static/chunks/326-ca1eaea43d1f2c4f.js",
-      "static/chunks/app/page-b39c4987687dafe7.js"
-    ],
     "/editarCadastro/page": [
       "static/chunks/webpack-9d9d79d744a4a034.js",
       "static/chunks/fd9d1056-13342476f4426106.js",
@@ -48,14 +40,6 @@
       "static/chunks/326-ca1eaea43d1f2c4f.js",
       "static/chunks/app/editarCadastro/page-0968f279eb430683.js"
     ],
-    "/painel/page": [
-      "static/chunks/webpack-9d9d79d744a4a034.js",
-      "static/chunks/fd9d1056-13342476f4426106.js",
-      "static/chunks/472-4c7f1c38a7e95f4e.js",
-      "static/chunks/main-app-6b9cca0b1b6176f3.js",
-      "static/chunks/326-ca1eaea43d1f2c4f.js",
-      "static/chunks/app/painel/page-7a954ae9d43c0e24.js"
-    ],
     "/login/page": [
       "static/chunks/webpack-9d9d79d744a4a034.js",
       "static/chunks/fd9d1056-13342476f4426106.js",
@@ -63,6 +47,22 @@
       "static/chunks/main-app-6b9cca0b1b6176f3.js",
       "static/chunks/517-b39b4638784a8b03.js",
       "static/chunks/app/login/page-9d31a36c4890602a.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-9d9d79d744a4a034.js",
+      "static/chunks/fd9d1056-13342476f4426106.js",
+      "static/chunks/472-4c7f1c38a7e95f4e.js",
+      "static/chunks/main-app-6b9cca0b1b6176f3.js",
+      "static/chunks/326-ca1eaea43d1f2c4f.js",
+      "static/chunks/app/page-b39c4987687dafe7.js"
+    ],
+    "/painel/page": [
+      "static/chunks/webpack-9d9d79d744a4a034.js",
+      "static/chunks/fd9d1056-13342476f4426106.js",
+      "static/chunks/472-4c7f1c38a7e95f4e.js",
+      "static/chunks/main-app-6b9cca0b1b6176f3.js",
+      "static/chunks/326-ca1eaea43d1f2c4f.js",
+      "static/chunks/app/painel/page-678d8ed8edc5779d.js"
     ]
   }
 }
