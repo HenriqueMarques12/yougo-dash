@@ -7,6 +7,9 @@ import MenuAtracao from '@/components/MenuAtracao'
 import Image from 'next/image'
 import Link from 'next/link'
 
+
+
+
 export default function EditarCadastro() {
 
   const menu = [
@@ -58,6 +61,7 @@ export default function EditarCadastro() {
     <MenuAtracao />
     <Menu />
     <Survey />  */}
+    
     <div className="text-white px-4 py-6">
       <h1 className='text-center text-secondary'>
       Editar cadastro
@@ -69,7 +73,7 @@ export default function EditarCadastro() {
             return (
               <Link
                 key={i.id}
-                href={`editarCadastro/${i.linkUrl}`}
+                href={`editarCadastro/${i?.linkUrl}`}
                 className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg transition-shadow justify-between items-center"
               >
                 <p>{i.btnTitle}</p>

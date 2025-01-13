@@ -139,7 +139,7 @@ export default function ListaCadastro({ params }: PageProps) {
             {filteredData.map((item) => (
               <Link
                 key={item.id}
-                href={`${slug}/${item.id}`}
+                href={`${slug}/${item?.id}`}
                 className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg"
               >
                 <p>{item.nome}</p>
@@ -153,7 +153,7 @@ export default function ListaCadastro({ params }: PageProps) {
             {data.map((item) => (
               <Link
                 key={item.id}
-                href={`${slug}/${item.id}`}
+                href={`${slug}/${item?.id}`}
                 className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg"
               >
                 <p>{item.nome}</p>
