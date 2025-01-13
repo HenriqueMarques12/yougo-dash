@@ -1,7 +1,11 @@
 "use client";
 
+
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePathname } from "next/navigation";
+
+
 
 // Define o tipo do valor do contexto
 const RouteContext = createContext<string | undefined>(undefined);

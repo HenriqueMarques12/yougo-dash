@@ -7,6 +7,9 @@ import MenuAtracao from '@/components/MenuAtracao'
 import Image from 'next/image'
 import Link from 'next/link'
 
+
+
+
 export default function EditarCadastro() {
 
   const menu = [
