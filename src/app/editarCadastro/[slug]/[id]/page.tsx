@@ -60,35 +60,16 @@ export default function SobreUsuario({ params }: PageProps) {
     reset,
     formState: {errors}
   } = useForm<Inputs>({
-    defaultValues: {
-      password: userData?.password,
-      nome: userData?.nome,
-      cpf: userData?.cpf,
-      dataNascimento: userData?.dataNascimento,
-      email: userData?.email,
-      telefone: userData?.telefone,
-      plano: userData?.plano,
-      parceiro: userData?.parceiro,
-      estado: userData?.estado,
-      cidade: userData?.cidade,
-    },
+    defaultValues: {},
     resolver:  handleForm(userData?.role),
   });
 
-  const handleCidades_Parceiros = async (estado:string) => {
+  const handleCidade = async (estado:string) => {
 
     const [
       cidades,
-      parceiros,
     ] = await Promise.all([
       await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado.toLowerCase()}/municipios`, {
-          method: "GET",
-          headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-          },
-      }),
-      await fetch(`${api.baseApi}/auth/users/role/parceiro`, {
           method: "GET",
           headers: {
               Accept: "application/json",
@@ -99,23 +80,55 @@ export default function SobreUsuario({ params }: PageProps) {
     ])
 
     let c = await cidades.json()
-    let p =  await parceiros.json()
 
     let arr:string[] = []
-    let arrParceiros:{id:string, nome:string}[] = []
 
     c.map((i:any) => arr.push(i.nome))
-    p.map((i:any) => arrParceiros.push(i))
 
 
     //console.log({arr})
 
     setCidades(arr)
+  }
+
+  const handleCidades_Parceiros = async (estado:string) => {
+
+    const [
+      cidades,
+      parceiros,
+    ] = await Promise.all([
+      handleCidade(estado),
+      await fetch(`${api.baseApi}/auth/users/role/parceiro`, {
+          method: "GET",
+          headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+          },
+      })
+    
+    ])
+
+    let p =  await parceiros.json()
+
+    let arr:string[] = []
+    let arrParceiros:{id:string, nome:string}[] = []
+
+    p.map((i:any) => arrParceiros.push(i))
+
+
+    //console.log({arr})
+
     setParceiros(arrParceiros)
   }
 
 
-  const fetchData = async () => {
+ 
+
+
+  const estado = watch("estado")
+  const cidade = watch("cidade")
+
+ /*  const fetchData = async () => {
     setLoad(true)
     const response = await fetch(`${API.baseApi}/auth/${id}`);
     const u = await response.json();
@@ -126,37 +139,27 @@ export default function SobreUsuario({ params }: PageProps) {
     setLoad(false)
   };
 
-
- 
-  const processForm: SubmitHandler<Inputs> = async (data) => {
-   // console.log("Dados enviados:", data); // Verificar se os dados estão chegando
-    setAlertStatusFail(false)
-    setAlertStatusSuccess(false)
+  */
+  
+  const fetchData = async () => { 
     setLoad(true);
-    try {
-      const result = await fetch(`${api.baseApi}/auth/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...data, id: id.toString() }),
-      }).then((response) => response.json());
-      //console.log("Resposta do servidor:", result); // Verificar a resposta do servidor
-      fetchData(); // Atualizar dados após o envio
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      //console.error("Erro ao enviar dados:", error); // Exibir erro no console
-      setAlertStatusFail(true)
-      setAlertText(`Erro ao enviar dados: ${error}`)
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
+    const response = await fetch(`${API.baseApi}/auth/${id}`);
+    const u = await response.json();
+    setUserData(u);
+    await handleCidades_Parceiros(u.estado);
+    reset({ 
+      password: u.password,
+      nome: u.nome,
+      cpf: u.cpf,
+      dataNascimento: u.dataNascimento,
+      email: u.email,
+      telefone: u.telefone, 
+      plano: u.plano, 
+      parceiro: u.parceiro,
+      estado: u.estado,
+      cidade: u.cidade,
+    });
       setLoad(false);
-      setAlertStatusSuccess(true)
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   useEffect(() => {
@@ -178,11 +181,45 @@ export default function SobreUsuario({ params }: PageProps) {
         cidade: userData?.cidade,
         
       });
-
-     
-
     }
   }, [userData, reset]);
+
+  useEffect(() => {
+    if(estado) {
+      handleCidade(estado)
+    }
+  }, [estado]);
+
+  const processForm: SubmitHandler<Inputs> = async (data) => {
+    // console.log("Dados enviados:", data); // Verificar se os dados estão chegando
+     setAlertStatusFail(false)
+     setAlertStatusSuccess(false)
+     setLoad(true);
+     try {
+       const result = await fetch(`${api.baseApi}/auth/${id}`, {
+         method: 'PUT',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ ...data, id: id.toString() }),
+       }).then((response) => response.json());
+       //console.log("Resposta do servidor:", result); // Verificar a resposta do servidor
+       fetchData(); // Atualizar dados após o envio
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     } catch (error) {
+       //console.error("Erro ao enviar dados:", error); // Exibir erro no console
+       setAlertStatusFail(true)
+       setAlertText(`Erro ao enviar dados: ${error}`)
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     } finally {
+       setLoad(false);
+       setAlertStatusSuccess(true)
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     }
+   };
 
 
  

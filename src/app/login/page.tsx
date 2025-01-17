@@ -81,9 +81,17 @@ export default function Login() {
       if (content && typeof content === 'object' && 'user' in content && 'id' in content.user) {
         //console.log('Usuário autenticado com ID:', content.user.id);
         setData(content.user);
-  
+
+        if(content.user.role === 'vendedor') {
+          setAlertText("Ops, Credencial invalida.")
+          setAlertStatus(true)
+          setLoad(false);
+          return
+        }
+
         // Salvar o ID do usuário no localStorage
         localStorage.setItem('userId', content.user.id);
+        localStorage.setItem('userRole', content.user.role);
 
         // Redirecionar para a página de painel
         router.push('/painel');
