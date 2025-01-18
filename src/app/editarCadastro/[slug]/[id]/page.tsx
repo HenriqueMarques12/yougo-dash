@@ -3,13 +3,13 @@
 import { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import API from '../../../../service/api';
-import { planos } from '@/app/lib/SelectItems';
+import { estados, planos } from '@/app/lib/SelectItems';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
 
 import {z} from "zod"
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormDataEditSchema, UserType } from '@/app/lib/schema';
+import { FormDataEditSchema, FormDataAdminParceiroEditSchema, FormDataVendedorEditSchema, UserType } from '@/app/lib/schema';
 import InputMask from 'react-input-mask-next';
 import api from '../../../../service/api';
 
@@ -17,18 +17,42 @@ interface PageProps {
   params: { id: number };
 }
 
-type Inputs = z.infer<typeof FormDataEditSchema>
+
+type Inputs = 
+  | z.infer<typeof FormDataEditSchema>
+  | z.infer<typeof FormDataAdminParceiroEditSchema>
+  | z.infer<typeof FormDataVendedorEditSchema>;
+
 
 
 export default function SobreUsuario({ params }: PageProps) {
   const { id } = params;
   const [userData, setUserData] = useState<UserType>()
+  const [cidades, setCidades] = useState<string[]>([])
+  const [parceiros, setParceiros] = useState<{id:string, nome:string}[]>([])
   const [showPassword, setShowPassword] = useState<Boolean>()
   const [load, setLoad] = useState<Boolean>(false)
   const [alertStatusSuccess, setAlertStatusSuccess] = useState<Boolean>()
   const [alertStatusFail, setAlertStatusFail] = useState<Boolean>()
   const [alertText, setAlertText] = useState<String>()
 
+  const handleForm = (role: string | undefined) => {
+    switch (role) {
+      case 'admin':
+        return zodResolver(FormDataAdminParceiroEditSchema);
+        break
+      case 'parceiro':
+        return zodResolver(FormDataAdminParceiroEditSchema);
+        break
+      case 'vendedor':
+        return zodResolver(FormDataVendedorEditSchema);
+        break
+      case 'cliente':
+        return zodResolver(FormDataEditSchema);
+        break
+    }
+  };
+  
   const {
     register,
     handleSubmit,
@@ -36,56 +60,106 @@ export default function SobreUsuario({ params }: PageProps) {
     reset,
     formState: {errors}
   } = useForm<Inputs>({
-      defaultValues: {
-        "password": userData?.password,
-        "nome": userData?.nome,
-        "cpf": userData?.cpf,
-        "dataNascimento": userData?.dataNascimento,
-        "email": userData?.email,
-        "telefone": userData?.telefone,
-        "plano": userData?.plano,
-      },
-     resolver: zodResolver(FormDataEditSchema)  
-     
-  })
+    defaultValues: {},
+    resolver:  handleForm(userData?.role),
+  });
 
-  const fetchData = async () => {
+  const handleCidade = async (estado:string) => {
+
+    const [
+      cidades,
+    ] = await Promise.all([
+      await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estado.toLowerCase()}/municipios`, {
+          method: "GET",
+          headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+          },
+      })
+    
+    ])
+
+    let c = await cidades.json()
+
+    let arr:string[] = []
+
+    c.map((i:any) => arr.push(i.nome))
+
+
+    //console.log({arr})
+
+    setCidades(arr)
+  }
+
+  const handleCidades_Parceiros = async (estado:string) => {
+
+    const [
+      cidades,
+      parceiros,
+    ] = await Promise.all([
+      handleCidade(estado),
+      await fetch(`${api.baseApi}/auth/users/role/parceiro`, {
+          method: "GET",
+          headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+          },
+      })
+    
+    ])
+
+    let p =  await parceiros.json()
+
+    let arr:string[] = []
+    let arrParceiros:{id:string, nome:string}[] = []
+
+    p.map((i:any) => arrParceiros.push(i))
+
+
+    //console.log({arr})
+
+    setParceiros(arrParceiros)
+  }
+
+
+ 
+
+
+  const estado = watch("estado")
+  const cidade = watch("cidade")
+
+ /*  const fetchData = async () => {
     setLoad(true)
     const response = await fetch(`${API.baseApi}/auth/${id}`);
     const u = await response.json();
+    console.log({u})
+  
     setUserData(u);
+    await handleCidades_Parceiros(u.estado)
     setLoad(false)
   };
 
-  const processForm: SubmitHandler<Inputs> = async (data) => {
-   // console.log("Dados enviados:", data); // Verificar se os dados estão chegando
-    setAlertStatusFail(false)
-    setAlertStatusSuccess(false)
+  */
+  
+  const fetchData = async () => { 
     setLoad(true);
-    try {
-      const result = await fetch(`${api.baseApi}/auth/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...data, id: id.toString() }),
-      }).then((response) => response.json());
-      console.log("Resposta do servidor:", result); // Verificar a resposta do servidor
-      fetchData(); // Atualizar dados após o envio
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error("Erro ao enviar dados:", error); // Exibir erro no console
-      setAlertStatusFail(true)
-      setAlertText(`Erro ao enviar dados: ${error}`)
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } finally {
+    const response = await fetch(`${API.baseApi}/auth/${id}`);
+    const u = await response.json();
+    setUserData(u);
+    await handleCidades_Parceiros(u.estado);
+    reset({ 
+      password: u.password,
+      nome: u.nome,
+      cpf: u.cpf,
+      dataNascimento: u.dataNascimento,
+      email: u.email,
+      telefone: u.telefone, 
+      plano: u.plano, 
+      parceiro: u.parceiro,
+      estado: u.estado,
+      cidade: u.cidade,
+    });
       setLoad(false);
-      setAlertStatusSuccess(true)
-      // Scroll para o topo da página
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   useEffect(() => {
@@ -95,16 +169,57 @@ export default function SobreUsuario({ params }: PageProps) {
   useEffect(() => {
     if (userData) {
       reset({
-        password: userData.password,
-        nome: userData.nome,
-        cpf: userData.cpf,
-        dataNascimento: userData.dataNascimento,
-        email: userData.email,
-        telefone: userData.telefone,
-        plano: userData.plano,
+        password: userData?.password,
+        nome: userData?.nome,
+        cpf: userData?.cpf,
+        dataNascimento: userData?.dataNascimento,
+        email: userData?.email,
+        telefone: userData?.telefone,
+        plano: userData?.plano,
+        parceiro: userData?.parceiro,
+        estado: userData?.estado,
+        cidade: userData?.cidade,
+        
       });
     }
   }, [userData, reset]);
+
+  useEffect(() => {
+    if(estado) {
+      handleCidade(estado)
+    }
+  }, [estado]);
+
+  const processForm: SubmitHandler<Inputs> = async (data) => {
+    // console.log("Dados enviados:", data); // Verificar se os dados estão chegando
+     setAlertStatusFail(false)
+     setAlertStatusSuccess(false)
+     setLoad(true);
+     try {
+       const result = await fetch(`${api.baseApi}/auth/${id}`, {
+         method: 'PUT',
+         headers: {
+           'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ ...data, id: id.toString() }),
+       }).then((response) => response.json());
+       //console.log("Resposta do servidor:", result); // Verificar a resposta do servidor
+       fetchData(); // Atualizar dados após o envio
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     } catch (error) {
+       //console.error("Erro ao enviar dados:", error); // Exibir erro no console
+       setAlertStatusFail(true)
+       setAlertText(`Erro ao enviar dados: ${error}`)
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     } finally {
+       setLoad(false);
+       setAlertStatusSuccess(true)
+       // Scroll para o topo da página
+       window.scrollTo({ top: 0, behavior: 'smooth' });
+     }
+   };
 
 
  
@@ -202,6 +317,84 @@ export default function SobreUsuario({ params }: PageProps) {
               </div>
             }
           </div>
+          
+          {userData?.role === "admin" &&
+             <div className="flex justify-between mb-5">
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
+                  <select   {...register("estado")}   id="estado" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {estados.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cidade</label>
+                  <select   {...register("cidade")}   id="cidade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {cidades.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+              </div>
+          }
+
+          {userData?.role === "parceiro"  &&
+             <div className="flex justify-between mb-5">
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
+                  <select   {...register("estado")}   id="estado" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {estados.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cidade</label>
+                  <select   {...register("cidade")}   id="cidade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {cidades.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+              </div>
+          }
+
+          {userData?.role === "vendedor" &&
+            <>
+              <div className="flex justify-between mb-5">
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Estado</label>
+                  <select   {...register("estado")}   id="estado" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {estados.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+
+                <div className="w-[45%]">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cidade</label>
+                  <select   {...register("cidade")}   id="cidade" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  {cidades.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+                  </select>
+                  
+                </div>
+              </div>
+
+              {parceiros.length > 0 &&
+                <div className="mb-5">
+                  <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Parceiro</label>
+                  <select   {...register("parceiro")}   id="parceiro" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    {parceiros.map((i) => {
+                      return  <option  key={`${i.id}`} value={`${i.id}`}>{i.nome}</option>
+                    })}
+                  </select>
+                </div>
+              }
+
+            </>
+             
+          }
+
+           
+
 
           <div className="mb-5 relative">
             <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Senha</label>
@@ -255,18 +448,17 @@ export default function SobreUsuario({ params }: PageProps) {
               </div>
             )}
           </div>
-
-          <div className="mb-5">
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Plano</label>
-            <select   {...register("plano")}   id="planos" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            {planos.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
-            </select>
-            {errors.plano?.message && (
-                <div className="p-4 mt-1 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-                  {errors.plano.message}
-                </div>
-            )}
-          </div>
+          
+          {userData?.role === "cliente" &&
+            <div className="mb-5">
+              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Plano</label>
+              <select   {...register("plano")}   id="planos" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              {planos.map((i) =>  <option  key={i} value={`${i}`}>{i}</option> )}
+              </select>
+             
+            </div>
+          }
+         
 
           {load &&
             <div className="flex justify-center items-center py-6" role="status">

@@ -1,13 +1,13 @@
-import Feature from '@/components/Feature'
-import Hero from '@/components/Hero'
-import Menu from '@/components/Menu'
-import Services from '@/components/Services'
-import Survey from '@/components/Survey'
-import MenuAtracao from '@/components/MenuAtracao'
-import Image from 'next/image'
+"use client"
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 export default function Painel() {
+  const [role, setRole] = useState<string | null>()
+  useEffect(()=> {
+    let role =  localStorage.getItem('userRole');
+    setRole(role)
+  },[])
 
   const menu = [
     {
@@ -61,7 +61,7 @@ export default function Painel() {
     {
       id:10,
       btnTitle: "Visualizar relatorios",
-      linkUrl: "visualizarImprimirRelatorios",
+      linkUrl: "relatorios",
       svg: <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#5ce65c" className="bi bi-database-fill" viewBox="0 0 16 16">
       <path d="M3.904 1.777C4.978 1.289 6.427 1 8 1s3.022.289 4.096.777C13.125 2.245 14 2.993 14 4s-.875 1.755-1.904 2.223C11.022 6.711 9.573 7 8 7s-3.022-.289-4.096-.777C2.875 5.755 2 5.007 2 4s.875-1.755 1.904-2.223"/>
       <path d="M2 6.161V7c0 1.007.875 1.755 1.904 2.223C4.978 9.71 6.427 10 8 10s3.022-.289 4.096-.777C13.125 8.755 14 8.007 14 7v-.839c-.457.432-1.004.751-1.49.972C11.278 7.693 9.682 8 8 8s-3.278-.307-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
@@ -73,34 +73,51 @@ export default function Painel() {
 
   return (
    <main id="home" className='font-hogfish'>
-  
-    {/* <Hero />
-    <Feature />
-    <Services />
-    <MenuAtracao />
-    <Menu />
-    <Survey />  */}
     <div className="text-white px-4 py-6">
       <h1 className='text-center text-secondary'>
         Painel
       </h1>
       <div className="flex flex-col space-y-4 items-center">
-        {menu
-          .filter((v) => v.id === 2 || v.id === 10)
-          .map((i) => {
-            return (
-              <Link
-                key={i.id}
-                href={i.linkUrl}
-                className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg transition-shadow justify-between items-center"
-              >
-                <p>{i.btnTitle}</p>
-                <span>{i.svg}</span>
-              </Link>
-            );
-          })}
-      </div>
+        <>
+          {role === "parceiro" &&
+              <>
+                {menu
+                .filter((v) => v.id === 10)
+                .map((i) => {
+                  return (
+                    <Link
+                      key={i.id}
+                      href={i.linkUrl}
+                      className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg transition-shadow justify-between items-center"
+                    >
+                      <p>{i.btnTitle}</p>
+                      <span>{i.svg}</span>
+                    </Link>
+                  );
+                })}
+              </>
+          }
 
+          {role === "admin" &&
+            <>
+              {menu
+                .filter((v) => v.id === 2 || v.id === 10)
+                .map((i) => {
+                  return (
+                    <Link
+                      key={i.id}
+                      href={i.linkUrl}
+                      className="flex w-full md:w-[40%] text-fontDark p-4 rounded shadow-md hover:shadow-lg transition-shadow justify-between items-center"
+                    >
+                      <p>{i.btnTitle}</p>
+                      <span>{i.svg}</span>
+                    </Link>
+                  );
+                })}
+            </>
+          }
+        </>
+      </div>
     </div>
    </main>
   )
